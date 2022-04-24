@@ -1,17 +1,40 @@
-package com.khaleghzadegan.ui;
+package com.khaleghzadegan.ui.cli.impl;
 
 import com.khaleghzadegan.logic.exception.InvalidInputException;
 import com.khaleghzadegan.logic.model.GridCell;
 import com.khaleghzadegan.logic.model.SudokuGrid;
+import com.khaleghzadegan.logic.service.GamePlayService;
+import com.khaleghzadegan.ui.service.UserInterfaceService;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Scanner;
 
-public class UserInterface {
+public class UserInterfaceServiceImpl implements UserInterfaceService {
 
-    public static SudokuGrid getSudokuGridFromUser() {
+    private static final GamePlayService gamePlayService = GamePlayService.build();
+
+    @Override
+    public void initializeUserInterface() {
+        greetUser();
+        SudokuGrid sudokuGrid = getSudokuGridFromUser();
+        displaySudoku(sudokuGrid);
+        if (userReadyToStart()) {
+            printMessage("Please be patient...");
+            SudokuGrid answer = gamePlayService.tryToSolve(sudokuGrid);
+            if (answer != null) {
+                printMessage("Hooray! Answer found :)");
+                displaySudoku(answer);
+            } else {
+                printMessage("Sorry! No answer found or the given Sudoku is not valid :(");
+            }
+
+        }
+    }
+
+
+    private static SudokuGrid getSudokuGridFromUser() {
         SudokuGrid sudokuGrid = new SudokuGrid();
         var gridCells = sudokuGrid.getGridCells();
         for (int i = 0; i < 9; i++)
@@ -50,15 +73,15 @@ public class UserInterface {
     }
 
 
-    public static void greetUser() {
+    private static void greetUser() {
         System.out.println("""
                 Welcome to Sudoku Solver! ver 1.0
                 Author: Ali Khaleghzadegan
-                Copyright ©2022 under GPL v3
+                Copyright 2022 under GPL v3
                 """);
     }
 
-    public static void displaySudoku(SudokuGrid sudokuGrid) {
+    private static void displaySudoku(SudokuGrid sudokuGrid) {
         GridCell[][] gridCells = sudokuGrid.getGridCells();
 
         System.out.println("");
@@ -83,7 +106,7 @@ public class UserInterface {
         }
     }
 
-    public static boolean userReadyToStart() {
+    private static boolean userReadyToStart() {
         System.out.println("");
         System.out.println("Ok! Now are you ready to begin? ");
         System.out.print("Please enter YES to start or NO to exit: ");
@@ -95,8 +118,7 @@ public class UserInterface {
         }
     }
 
-    public static void printMessage(String message) {
+    private static void printMessage(String message) {
         System.out.println(message);
     }
-
 }
